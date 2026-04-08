@@ -205,7 +205,11 @@
 <script>
 const yesMessages = [
   "R-Transactions are ready. Monitoring works perfectly. Let's go!",
+  "The audit trail is so detailed, historians want to study it.",
+  "Suspicious activity: none. Suspicious lack of activity: also none. Perfectly balanced.",
   "All systems green. R-Transactions flowing. Compliance says yes!",
+  "Compliance dashboard: all green. The only red is the 'GO LIVE' button waiting to be pressed.",
+  "The FIU hasn't called in months. Either we're perfect or they lost our number. Either way: GO!",
   "Compliance approved. Even they're surprised how fast that went.",
   "The settlement engine is purring like a kitten. AML is happy. Go live!",
   "Transaction monitoring: flawless. Fraud detection: armed. Compliance: impressed.",
@@ -221,7 +225,11 @@ const yesMessages = [
   "Monitoring is live, alerts are configured, R-Transactions are settled. GO!",
   "The compliance team reviewed it, approved it, AND said 'nice work'. Historic day.",
   "Transaction reconciliation: passing. Sanctions screening: clean. LAUNCH!",
-  "Even the sandbox environment is bored. Time for production!",
+  "R-Transaction latency: so low it arrived before we sent it.",
+  "Monitoring alerts: quiet. The good kind of quiet. The 'everything works' quiet.",
+  "R-Transactions per second: yes. Just... yes.",
+  "The monitoring dashboard hasn't shown a single yellow in weeks. We're getting spoiled.",
+  "R-Transaction settlement time: faster than your morning coffee order.",
   "R-Transactions are settled, monitoring is green, compliance is happy. SHIP IT!",
   "The risk assessment came back green. Not yellow. Not amber. GREEN.",
   "KYC pass rate: 99.8%. The 0.2% was Dave testing with his cat's passport again.",
@@ -250,10 +258,6 @@ const yesMessages = [
   "The compliance training completion rate is 100%. Even the CEO did it. Without complaints.",
   "Third-party due diligence: spotless. Our partners' compliance teams want to be us.",
   "Risk appetite statement: reviewed. Risk tolerance: within bounds. Risk of NOT going live: too high.",
-  "The audit trail is so detailed, historians want to study it.",
-  "Suspicious activity: none. Suspicious lack of activity: also none. Perfectly balanced.",
-  "Compliance dashboard: all green. The only red is the 'GO LIVE' button waiting to be pressed.",
-  "The FIU hasn't called in months. Either we're perfect or they lost our number. Either way: GO!",
 ];
 
 const noMessages = [
@@ -331,21 +335,17 @@ function showNo() {
 
   setTimeout(() => answerEl.classList.add('visible'), 50);
 
-  // Step 1: Slam "JUST KIDDING!" over the No
-  setTimeout(() => {
-    jkBannerEl.textContent = 'JUST KIDDING!';
-    setTimeout(() => jkBannerEl.classList.add('visible'), 50);
-  }, 1800);
-
-  // Step 2: Flip to green YES with the tease message
+  // After 1 second: flip to green, show JUST KIDDING + YES
   setTimeout(() => {
     document.body.className = 'state-jk';
-    answerEl.textContent = 'of course YES!';
+    answerEl.textContent = 'YES!';
+    jkBannerEl.textContent = 'JUST KIDDING!';
+    setTimeout(() => jkBannerEl.classList.add('visible'), 50);
     messageEl.textContent = pick.tease;
-    messageEl.classList.add('visible');
+    setTimeout(() => messageEl.classList.add('visible'), 300);
     spawnConfetti();
     setTimeout(() => { isAnimating = false; }, 1500);
-  }, 3000);
+  }, 1000);
 }
 
 function trigger() {
@@ -356,7 +356,12 @@ function trigger() {
   hintEl.classList.add('hidden');
   reset();
 
-  showYes();
+  // ~20% chance of fake No that flips to Yes after 1 second
+  if (Math.random() < 0.2) {
+    showNo();
+  } else {
+    showYes();
+  }
 }
 
 document.addEventListener('click', trigger);
