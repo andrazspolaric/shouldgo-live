@@ -335,17 +335,21 @@ function showNo() {
 
   setTimeout(() => answerEl.classList.add('visible'), 50);
 
-  // After 1 second: flip to green, show JUST KIDDING + YES
+  // Step 1: After 1s show JUST KIDDING (still red, still No visible)
+  setTimeout(() => {
+    jkBannerEl.textContent = 'JUST KIDDING!';
+    jkBannerEl.classList.add('visible');
+  }, 1000);
+
+  // Step 2: After 2s flip to green YES with tease
   setTimeout(() => {
     document.body.className = 'state-jk';
     answerEl.textContent = 'YES!';
-    jkBannerEl.textContent = 'JUST KIDDING!';
-    setTimeout(() => jkBannerEl.classList.add('visible'), 50);
     messageEl.textContent = pick.tease;
-    setTimeout(() => messageEl.classList.add('visible'), 300);
+    messageEl.classList.add('visible');
     spawnConfetti();
     setTimeout(() => { isAnimating = false; }, 1500);
-  }, 1000);
+  }, 2000);
 }
 
 function trigger() {
@@ -356,8 +360,8 @@ function trigger() {
   hintEl.classList.add('hidden');
   reset();
 
-  // ~20% chance of fake No that flips to Yes after 1 second
-  if (Math.random() < 0.2) {
+  // First click always YES; after that ~20% chance of fake No
+  if (clickCount > 1 && Math.random() < 0.2) {
     showNo();
   } else {
     showYes();
