@@ -144,10 +144,25 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       transition: opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
     }
 
     .hint.hidden {
       opacity: 0;
+    }
+
+    .hint kbd {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 5px;
+      padding: 0.2em 0.7em;
+      font-family: inherit;
+      font-size: 0.85em;
+      min-width: 4em;
+      text-align: center;
     }
 
     .confetti {
@@ -200,7 +215,7 @@
     <div class="jk-badge" id="jkBadge"></div>
   </div>
 
-  <div class="hint" id="hint">Hit Space or Click</div>
+  <div class="hint" id="hint">Press <kbd>Space</kbd> or Click</div>
 
 <script>
 const yesMessages = [
@@ -341,10 +356,12 @@ function showNo() {
     jkBannerEl.classList.add('visible');
   }, 1000);
 
-  // Step 2: After 2s flip to green YES with tease
+  // Step 2: After 2s flip to green YES, remove Just Kidding
   setTimeout(() => {
     document.body.className = 'state-jk';
     answerEl.textContent = 'YES!';
+    jkBannerEl.classList.remove('visible');
+    jkBannerEl.textContent = '';
     messageEl.textContent = pick.tease;
     messageEl.classList.add('visible');
     spawnConfetti();
