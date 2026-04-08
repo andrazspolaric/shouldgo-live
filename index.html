@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Should Paywiser Go Live Today?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.6s ease, color 0.6s ease;
+      cursor: pointer;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    body.state-waiting {
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    body.state-yes {
+      background: #059669;
+      color: #fff;
+    }
+
+    body.state-no {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    body.state-jk {
+      background: #059669;
+      color: #fff;
+    }
+
+    .container {
+      text-align: center;
+      padding: 2rem;
+      max-width: 800px;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 2rem;
+    }
+
+    h1 .highlight {
+      color: #38bdf8;
+      transition: color 0.6s ease;
+    }
+
+    body.state-yes h1 .highlight,
+    body.state-jk h1 .highlight {
+      color: #bbf7d0;
+    }
+
+    body.state-no h1 .highlight {
+      color: #fecaca;
+    }
+
+    .answer {
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 1rem;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .answer.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .message {
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      font-weight: 400;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      min-height: 2em;
+      line-height: 1.4;
+    }
+
+    .message.visible {
+      opacity: 1;
+    }
+
+    .jk-banner {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(255,255,255,0.2);
+      border-radius: 1rem;
+      padding: 0.3em 0.8em;
+      margin-top: 1rem;
+      opacity: 0;
+      transform: scale(0.3) rotate(-5deg);
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .jk-banner.visible {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+
+    .jk-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.25);
+      border-radius: 999px;
+      padding: 0.3em 1em;
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      font-weight: 600;
+      margin-top: 0.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .jk-badge.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hint {
+      position: fixed;
+      bottom: 2rem;
+      font-size: 0.9rem;
+      opacity: 0.5;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: opacity 0.3s ease;
+    }
+
+    .hint.hidden {
+      opacity: 0;
+    }
+
+    .confetti {
+      position: fixed;
+      top: -10px;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: fall linear forwards;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    .counter {
+      position: fixed;
+      top: 1.5rem;
+      right: 2rem;
+      font-size: 0.85rem;
+      opacity: 0.4;
+      letter-spacing: 0.05em;
+    }
+
+    .date-display {
+      position: fixed;
+      top: 1.5rem;
+      left: 2rem;
+      font-size: 0.85rem;
+      opacity: 0.4;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body class="state-waiting">
+
+  <div class="date-display" id="dateDisplay"></div>
+  <div class="counter" id="counter"></div>
+
+  <div class="container">
+    <h1>SHOULD <span class="highlight">Paywiser</span> GO LIVE TODAY?</h1>
+    <div class="answer" id="answer"></div>
+    <div class="message" id="message"></div>
+    <div class="jk-banner" id="jkBanner"></div>
+    <div class="jk-badge" id="jkBadge"></div>
+  </div>
+
+  <div class="hint" id="hint">Hit Space or Click</div>
+
+<script>
+const yesMessages = [
+  "R-Transactions are ready. Monitoring works perfectly. Let's go!",
+  "All systems green. R-Transactions flowing. Compliance says yes!",
+  "Compliance approved. Even they're surprised how fast that went.",
+  "The settlement engine is purring like a kitten. AML is happy. Go live!",
+  "Transaction monitoring: flawless. Fraud detection: armed. Compliance: impressed.",
+  "KYC checks passing. AML rules loaded. The compliance officer is smiling. That's rare.",
+  "The payment rails are HOT. R-Transactions are READY. Even the regulator nodded.",
+  "PSD2? Compliant. AML5? Sorted. SAR reports? Filed before you even asked.",
+  "The compliance checklist has ALL the boxes ticked. We counted. Twice.",
+  "Compliance approved so fast we thought it was a phishing email.",
+  "The KYC queue is empty. Say that again slowly. EMPTY.",
+  "AML screening: zero false positives today. Is this real life?",
+  "The ledger is balanced. The auditor shed a single tear of joy.",
+  "Card issuing: ready. Payment processing: ready. Compliance: already celebrating.",
+  "Monitoring is live, alerts are configured, R-Transactions are settled. GO!",
+  "The compliance team reviewed it, approved it, AND said 'nice work'. Historic day.",
+  "Transaction reconciliation: passing. Sanctions screening: clean. LAUNCH!",
+  "Even the sandbox environment is bored. Time for production!",
+  "R-Transactions are settled, monitoring is green, compliance is happy. SHIP IT!",
+  "The risk assessment came back green. Not yellow. Not amber. GREEN.",
+  "KYC pass rate: 99.8%. The 0.2% was Dave testing with his cat's passport again.",
+  "Fiat on-ramp: ready. Off-ramp: ready. Paywiser: BORN ready.",
+  "PSD2 compliant. EMI licensed. R-Transactions settled. What are you waiting for?",
+  "The compliance officer just gave a thumbs up. We didn't know they could do that.",
+  "All regulatory boxes ticked. The auditor asked if we're hiring.",
+  "AML rules so tight, even suspicious transactions file complaints about being flagged.",
+  "The regulator called. They said 'no notes'. We framed the email.",
+  "Sanctions list checked. Watchlist cleared. Compliance did a little dance.",
+  "KYC verified. CDD complete. EDD not even needed. This is the dream.",
+  "The compliance report is so clean you could eat off it. Please don't though.",
+  "The MLRO signed off and went home early. That's never happened before.",
+  "Beneficial ownership structure verified. Even the shell companies are jealous.",
+  "PEP screening found zero matches. We're dealing with ordinary legends here.",
+  "The risk matrix is so green it's photosynthesizing.",
+  "Source of funds documentation: immaculate. Source of wealth: also immaculate. GO!",
+  "Customer due diligence passed. Enhanced due diligence passed. Vibe check: also passed.",
+  "The compliance manual got shorter. That means we're doing something right.",
+  "Ongoing monitoring detected nothing suspicious. Just pure, beautiful transactions.",
+  "The regulator visited last week. They brought cake. CAKE.",
+  "Transaction limits configured. Velocity checks armed. Fraudsters in shambles.",
+  "The SAR filing system is so efficient it files SARs before the suspicious activity happens.",
+  "Four eyes principle applied. Both pairs of eyes gave enthusiastic thumbs up.",
+  "Record retention policy: compliant. Data protection: airtight. GDPR: trembling in respect.",
+  "The compliance training completion rate is 100%. Even the CEO did it. Without complaints.",
+  "Third-party due diligence: spotless. Our partners' compliance teams want to be us.",
+  "Risk appetite statement: reviewed. Risk tolerance: within bounds. Risk of NOT going live: too high.",
+  "The audit trail is so detailed, historians want to study it.",
+  "Suspicious activity: none. Suspicious lack of activity: also none. Perfectly balanced.",
+  "Compliance dashboard: all green. The only red is the 'GO LIVE' button waiting to be pressed.",
+  "The FIU hasn't called in months. Either we're perfect or they lost our number. Either way: GO!",
+];
+
+const noMessages = [
+  { no: "NO!", tease: "Did you see your face? The compliance team would flag that expression as suspicious." },
+  { no: "NOPE", tease: "You really thought compliance would say no? They've been ready since Tuesday." },
+  { no: "NAH", tease: "Your stress level just triggered our AML monitoring. Calm down." },
+  { no: "NO WAY", tease: "Just a compliance drill. You passed. The KYC on your reaction was flawless." },
+  { no: "ABORT!", tease: "Wanted to see who files a SAR first. Spoiler: it was you. On yourself." },
+  { no: "HOLD UP", tease: "The regulator isn't even watching. We checked. Twice." },
+  { no: "STOP!", tease: "Your blood pressure just failed enhanced due diligence." },
+  { no: "NEVER", tease: "The compliance team already popped the champagne. Join them!" },
+  { no: "DENIED", tease: "Compliance approved it ages ago. They're on their third coffee celebrating." },
+  { no: "BLOCKED!", tease: "Not by the regulator. By your own fear. The compliance report is spotless." },
+];
+
+let clickCount = 0;
+let isAnimating = false;
+
+const answerEl = document.getElementById('answer');
+const messageEl = document.getElementById('message');
+const jkBannerEl = document.getElementById('jkBanner');
+const jkBadgeEl = document.getElementById('jkBadge');
+const hintEl = document.getElementById('hint');
+const counterEl = document.getElementById('counter');
+const dateEl = document.getElementById('dateDisplay');
+
+// Show today's date
+const today = new Date();
+dateEl.textContent = today.toLocaleDateString('en-US', {
+  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+});
+
+function spawnConfetti() {
+  const colors = ['#fbbf24', '#38bdf8', '#a78bfa', '#f472b6', '#34d399', '#fb923c', '#fff'];
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.width = (Math.random() * 8 + 5) + 'px';
+    el.style.height = (Math.random() * 8 + 5) + 'px';
+    el.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+    el.style.animationDelay = (Math.random() * 0.5) + 's';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+}
+
+function reset() {
+  answerEl.classList.remove('visible');
+  messageEl.classList.remove('visible');
+  jkBannerEl.classList.remove('visible');
+  jkBannerEl.textContent = '';
+  jkBadgeEl.classList.remove('visible');
+  jkBadgeEl.textContent = '';
+}
+
+function showYes() {
+  const msg = yesMessages[Math.floor(Math.random() * yesMessages.length)];
+  document.body.className = 'state-yes';
+  answerEl.textContent = 'YES!';
+  messageEl.textContent = msg;
+
+  setTimeout(() => answerEl.classList.add('visible'), 50);
+  setTimeout(() => messageEl.classList.add('visible'), 300);
+  setTimeout(() => spawnConfetti(), 100);
+  setTimeout(() => { isAnimating = false; }, 1500);
+}
+
+function showNo() {
+  const pick = noMessages[Math.floor(Math.random() * noMessages.length)];
+  document.body.className = 'state-no';
+  answerEl.textContent = pick.no;
+  messageEl.textContent = '';
+
+  setTimeout(() => answerEl.classList.add('visible'), 50);
+
+  // Step 1: Slam "JUST KIDDING!" over the No
+  setTimeout(() => {
+    jkBannerEl.textContent = 'JUST KIDDING!';
+    setTimeout(() => jkBannerEl.classList.add('visible'), 50);
+  }, 1800);
+
+  // Step 2: Flip to green YES with the tease message
+  setTimeout(() => {
+    document.body.className = 'state-jk';
+    answerEl.textContent = 'of course YES!';
+    messageEl.textContent = pick.tease;
+    messageEl.classList.add('visible');
+    spawnConfetti();
+    setTimeout(() => { isAnimating = false; }, 1500);
+  }, 3000);
+}
+
+function trigger() {
+  if (isAnimating) return;
+  isAnimating = true;
+  clickCount++;
+  counterEl.textContent = `Clicks: ${clickCount}`;
+  hintEl.classList.add('hidden');
+  reset();
+
+  showYes();
+}
+
+document.addEventListener('click', trigger);
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    trigger();
+  }
+});
+</script>
+</body>
+</html>
