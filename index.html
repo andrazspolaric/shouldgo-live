@@ -377,7 +377,7 @@ function trigger() {
   reset();
 
   // First click always YES; after that ~20% chance of fake No
-  if (clickCount > 1 && Math.random() < 0.2) {
+  if (clickCount > 1 && Math.random() < 0.25) {
     showNo();
   } else {
     showYes();
