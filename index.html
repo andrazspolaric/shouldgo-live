@@ -374,7 +374,6 @@ function trigger() {
   isAnimating = true;
   clickCount++;
   counterEl.textContent = `Clicks: ${clickCount}`;
-  hintEl.classList.add('hidden');
   reset();
 
   // First click always YES; after that ~20% chance of fake No
